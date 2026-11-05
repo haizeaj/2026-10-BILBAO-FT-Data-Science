@@ -1,0 +1,91 @@
+--ejercicio 1
+SELECT empleados.Nombre, bares.Nombre 
+FROM empleados JOIN reparto ON empleados.CodE = reparto.CodE
+JOIN bares ON reparto.CodB = bares.CodB
+WHERE bares.Nombre = "Stop" AND reparto.Fecha BETWEEN '2005-10-17' AND '2005-10-23';
+
+--ejercicio 2
+SELECT DISTINCT bares.Cif, bares.Nombre 
+FROM bares JOIN reparto ON bares.CodB = reparto.CodB
+JOIN cervezas ON reparto.CodC = cervezas.CodC
+WHERE cervezas.Capacidad <= 1 AND cervezas.Envase = "Botella"
+ORDER BY bares.Localidad;
+
+--ejercicio 3
+SELECT empleados.Nombre, bares.Nombre, cervezas.Envase, cervezas.Capacidad 
+FROM reparto JOIN empleados ON empleados.CodE = reparto.CodE
+JOIN bares ON bares.CodB = reparto.CodB
+JOIN cervezas ON cervezas.CodC = reparto.CodC
+WHERE empleados.Nombre = "Prudencio Caminero"; 
+
+--ejercicio 4
+SELECT DISTINCT bares.Nombre 
+FROM bares JOIN reparto ON bares.CodB = reparto.CodB
+JOIN cervezas ON cervezas.CodC = reparto.CodC
+WHERE cervezas.Envase = "Botella" AND cervezas.Capacidad >= 0.2 AND cervezas.Capacidad <= 0.33; 
+
+--ejercicio 5
+SELECT DISTINCT empleados.Nombre, bares.Nombre
+FROM empleados JOIN reparto 
+    ON empleados.CodE = reparto.CodE
+JOIN cervezas 
+    ON cervezas.CodC = reparto.CodC
+JOIN bares 
+    ON bares.CodB = reparto.CodB
+WHERE bares.Nombre IN ('Stop', 'Las Vegas') AND cervezas.Envase = "Botella";
+
+--ejemplos 6
+SELECT DISTINCT empleados.Nombre, reparto.Cantidad
+FROM reparto JOIN empleados 
+    ON empleados.CodE = reparto.CodE
+JOIN bares 
+    ON bares.CodB = reparto.CodB
+WHERE bares.Localidad != "Villa Botijo";
+
+--ejemplo 7
+SELECT
+    bares.Nombre,
+    bares.Localidad,
+    SUM(reparto.Cantidad * cervezas.Capacidad) AS litros_comprados
+FROM bares
+JOIN reparto
+    ON bares.CodB = reparto.CodB
+JOIN cervezas
+    ON reparto.CodC = cervezas.CodC
+GROUP BY bares.CodB
+ORDER BY litros_comprados DESC;
+
+---ejercicio 8
+SELECT DISTINCT bares.Nombre, cervezas.Envase
+FROM bares
+JOIN reparto 
+    ON bares.CodB = reparto.CodB
+JOIN cervezas 
+    ON cervezas.CodC = reparto.CodC
+WHERE cervezas.Envase = "Botella" AND cervezas.Capacidad < 1;
+
+--ejercicio 9
+UPDATE empleados
+SET Sueldo = Sueldo * 1.05
+WHERE CodE = (
+    SELECT CodE
+    FROM reparto
+    GROUP BY CodE
+    ORDER BY COUNT(DISTINCT Fecha) DESC
+    LIMIT 1
+);
+
+--ejemplo 10
+INSERT INTO reparto (CodE, CodB, CodC, Fecha, Cantidad)
+SELECT
+    empleados.CodE,
+    bares.CodB,
+    cervezas.CodC,
+    '2005-10-26',
+    48
+FROM empleados
+CROSS JOIN bares
+CROSS JOIN cervezas
+WHERE empleados.Nombre = 'Vicente Merario'
+  AND bares.Nombre = 'Stop'
+  AND cervezas.Envase = 'Lata';
